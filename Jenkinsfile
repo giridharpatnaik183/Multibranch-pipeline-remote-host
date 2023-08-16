@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+ 
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps' // Set this to the actual path of the Tomcat webapps directory
     }
