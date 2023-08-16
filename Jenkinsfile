@@ -16,7 +16,7 @@ pipeline {
         stage('Copy HTML to Tomcat') {
             steps {
                 script {
-                    def tomcatWebappsDir = "/var/lib/tomcat9/webapps/ROOT/"
+                    def tomcatWebappsDir = "/var/lib/tomcat9/webapps"
                     def sourceHtmlPath
 
                     // Determine the source index.html based on the branch
@@ -28,8 +28,10 @@ pipeline {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
 
-                    // Copy the appropriate index.html to Tomcat
-                    sh "cp ${sourceHtmlPath} ${tomcatWebappsDir}/index.html"
+                    // Copy the appropriate index.html to Tomcat in a separate context
+                    def context = env.BRANCH_NAME.toLowerCase() // Use lowercase branch name as context
+                    sh "mkdir -p ${tomcatWebappsDir}/${context}"
+                    sh "cp ${sourceHtmlPath} ${tomcatWebappsDir}/${context}/index.html"
                 }
             }
         }
