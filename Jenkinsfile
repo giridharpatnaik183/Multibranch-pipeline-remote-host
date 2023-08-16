@@ -20,9 +20,9 @@ pipeline {
                     def sourceHtmlPath
 
                     // Determine the source index.html based on the branch
-                    if (env.BRANCH_NAME == 'prod') {
+                    if (env.BRANCH_NAME == 'Prod') {
                         sourceHtmlPath = 'index_prod.html'
-                    } else if (env.BRANCH_NAME == 'dev') {
+                    } else if (env.BRANCH_NAME == 'Dev') {
                         sourceHtmlPath = 'index_dev.html'
                     } else {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
