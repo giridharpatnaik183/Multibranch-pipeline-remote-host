@@ -42,6 +42,9 @@ pipeline {
                     tomcatAuth = "${TOMCAT_USERNAME}:${TOMCAT_PASSWORD}"
                     def context = env.BRANCH_NAME.toLowerCase()
 
+                    echo "Tomcat URL: ${tomcatUrl}${context}/index.html"
+                    echo "Curl Command: curl -T ${sourceHtmlPath} ${tomcatUrl}${context}/index.html --user ${tomcatAuth}"
+
                     sh "curl -T ${sourceHtmlPath} ${tomcatUrl}${context}/index.html --user ${tomcatAuth} --write-out %{http_code} --silent --output /dev/null"
                 }
             }
