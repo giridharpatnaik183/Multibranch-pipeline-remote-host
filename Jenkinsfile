@@ -40,7 +40,7 @@ pipeline {
 
                     tomcatAuth = "${TOMCAT_USERNAME}:${TOMCAT_PASSWORD}"
 
-                    sh "curl -T ${sourceHtmlPath} ${tomcatUrl} --user ${tomcatAuth} --write-out %{http_code} --silent --output /dev/null"
+                    sh "curl -T ${sourceHtmlPath} ${tomcatUrl} --user ${tomcatAuth} --write-out '%{http_code}' --silent --output /dev/null"
                 }
             }
         }
