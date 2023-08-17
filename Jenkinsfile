@@ -27,11 +27,11 @@ pipeline {
                     def tomcatUrl
                     def tomcatAuth
 
-                    if (env.BRANCH_NAME == 'prod') {
+                    if (env.BRANCH_NAME.toLowerCase() == 'prod') {
                         sourceHtmlPath = 'index_prod.html'
                         tomcatWebappsDir = "/manager/text/deploy?path=/"
                         tomcatUrl = "http://${PROD_TOMCAT_IP}:${PROD_TOMCAT_PORT}${tomcatWebappsDir}"
-                    } else if (env.BRANCH_NAME == 'dev') {
+                    } else if (env.BRANCH_NAME.toLowerCase() == 'dev') {
                         sourceHtmlPath = 'index_dev.html'
                         tomcatWebappsDir = "/manager/text/deploy?path=/"
                         tomcatUrl = "http://${DEV_TOMCAT_IP}:${DEV_TOMCAT_PORT}${tomcatWebappsDir}"
