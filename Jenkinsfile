@@ -3,10 +3,10 @@ pipeline {
 
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
-        DEV_TOMCAT_IP = '54.80.115.152'
+        DEV_TOMCAT_IP = '54.224.2.7'
         DEV_TOMCAT_PORT = '8091'
-        PROD_TOMCAT_IP = '3.234.86.185'
-        PROD_TOMCAT_PORT = '8090'
+        PROD_TOMCAT_IP = '3.91.72.144'
+        PROD_TOMCAT_PORT = '8092'
         TOMCAT_USERNAME = 'tomcat'
         TOMCAT_PASSWORD = 'password'
     }
