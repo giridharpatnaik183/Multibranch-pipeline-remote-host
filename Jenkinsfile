@@ -1,4 +1,3 @@
-# working Jenkins file for Multibranch pipeline on remote server i.e deploying dev on jenkins node sever and prod on another server
 pipeline {
     agent any
 
