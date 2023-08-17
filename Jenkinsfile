@@ -1,6 +1,6 @@
 pipeline {
     agent any
- 
+
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
         DEV_TOMCAT_IP = '54.157.219.59'
