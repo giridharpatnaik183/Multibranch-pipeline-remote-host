@@ -16,23 +16,25 @@ pipeline {
         }
 
         stage('Copy HTML to Tomcat on Dev Server') {
-            steps {
-                script {
-                    def sourceHtmlPath
+    steps {
+        script {
+            def sourceHtmlPath
 
-                    // Determine the source index.html based on the branch
-                    if (env.BRANCH_NAME == 'Dev') {
-                        sourceHtmlPath = 'index_dev.html'
-                    } else {
-                        error("Unsupported branch: ${env.BRANCH_NAME}")
-                    }
+            // Determine the source index.html based on the branch
+            if (env.BRANCH_NAME == 'Dev') {
+                sourceHtmlPath = 'index_dev.html'
+            } else {
+                error("Unsupported branch: ${env.BRANCH_NAME}")
+            }
 
-                    // Copy the appropriate index.html to the target Tomcat server
-                    def context = env.BRANCH_NAME.toLowerCase() // Use lowercase branch name as context
-                    sh "ssh user@${TARGET_SERVER} -p ${TARGET_PORT} 'mkdir -p ${TOMCAT_WEBAPPS}/${context}'"
-                    sh "scp -P ${TARGET_PORT} ${sourceHtmlPath} user@${TARGET_SERVER}:${TOMCAT_WEBAPPS}/${context}/index.html"
-                }
+            def context = env.BRANCH_NAME.toLowerCase() // Use lowercase branch name as context
+            sshagent(['my-ssh-credentials']) {
+                sh "ssh -p ${TARGET_PORT} user@${TARGET_SERVER} 'mkdir -p ${TOMCAT_WEBAPPS}/${context}'"
+                sh "scp -P ${TARGET_PORT} ${sourceHtmlPath} user@${TARGET_SERVER}:${TOMCAT_WEBAPPS}/${context}/index.html"
             }
         }
+    }
+}
+
     }
 }
