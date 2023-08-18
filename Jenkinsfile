@@ -29,9 +29,9 @@ pipeline {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
 
-                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
+                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}"
                     sh "sshpass -p my_ssh_credentials ssh -p ${REMOTE_PORT} ${remoteDir} 'mkdir -p ${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}'"
-                    sh "sshpass -p my_ssh_credentials scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}/index.html"
+                    sh "sshpass -p my_ssh_credentials scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
                 }
             }
         }
