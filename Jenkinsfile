@@ -29,11 +29,11 @@ pipeline {
 
                     if (env.BRANCH_NAME.toLowerCase() == 'prod') {
                         sourceHtmlPath = 'index_prod.html'
-                        tomcatWebappsDir = "/manager/text/deploy?path=/"
+                        tomcatWebappsDir = "/manager/text/deploy?path=/&update=true"
                         tomcatUrl = "http://${PROD_TOMCAT_IP}:${PROD_TOMCAT_PORT}${tomcatWebappsDir}"
                     } else if (env.BRANCH_NAME.toLowerCase() == 'dev') {
                         sourceHtmlPath = 'index_dev.html'
-                        tomcatWebappsDir = "/manager/text/deploy?path=/"
+                        tomcatWebappsDir = "/manager/text/deploy?path=/&update=true"
                         tomcatUrl = "http://${DEV_TOMCAT_IP}:${DEV_TOMCAT_PORT}${tomcatWebappsDir}"
                     } else {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
