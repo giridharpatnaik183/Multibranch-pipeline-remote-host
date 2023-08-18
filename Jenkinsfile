@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+ 
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
         REMOTE_USERNAME = 'RemoteServer'
@@ -21,17 +21,17 @@ pipeline {
                 script {
                     def sourceHtmlPath
 
-                    if (env.BRANCH_NAME == 'Prod') {  // Use uppercase 'Prod'
+                    if (env.BRANCH_NAME == 'Prod') {
                         sourceHtmlPath = 'index_prod.html'
-                    } else if (env.BRANCH_NAME == 'Dev') {  // Use uppercase 'Dev'
+                    } else if (env.BRANCH_NAME == 'Dev') {
                         sourceHtmlPath = 'index_dev.html'
                     } else {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
 
-                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}"
-                    sh "sshpass -p my_ssh_credentials ssh -p ${REMOTE_PORT} ${remoteDir} 'mkdir -p ${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}'"
-                    sh "sshpass -p my_ssh_credentials scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
+                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
+                    sh "ssh ${remoteDir} 'mkdir -p ${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}'"
+                    sh "scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
                 }
             }
         }
@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST} -p ${REMOTE_PORT}"
-                    sh "sshpass -p my_ssh_credentials ssh -p ${REMOTE_PORT} ${remoteDir} 'sudo service tomcat9 restart'"
+                    sh "ssh ${remoteDir} 'sudo service tomcat9 restart'"
                 }
             }
         }
