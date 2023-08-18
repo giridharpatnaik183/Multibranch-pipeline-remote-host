@@ -1,26 +1,27 @@
 pipeline {
     agent any
- 
+
     environment {
-        TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
-        REMOTE_USERNAME = 'RemoteServer'
-        REMOTE_HOST = '54.226.135.62'
-        REMOTE_PORT = '22' // SSH port for the remote instance
-        REMOTE_WEBAPPS = '/var/lib/tomcat9/webapps' // Adjust this to the actual path on the remote instance
+        TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps' // Set this to the actual path of the Tomcat webapps directory
+        REMOTE_SERVER_IP = '54.226.135.62'
+        TOMCAT_PORT = '8090'
+        REMOTE_TOMCAT_WEBAPPS = "/var/lib/tomcat9/webapps" // Path on the remote server
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Checkout the code from the Git repository
                 checkout scm
             }
         }
 
-        stage('Copy HTML to Remote Instance') {
+        stage('Deploy HTML to Remote Tomcat') {
             steps {
                 script {
                     def sourceHtmlPath
 
+                    // Determine the source index.html based on the branch
                     if (env.BRANCH_NAME == 'Prod') {
                         sourceHtmlPath = 'index_prod.html'
                     } else if (env.BRANCH_NAME == 'Dev') {
@@ -29,18 +30,28 @@ pipeline {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
 
-                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
-                    sh "ssh ${remoteDir} 'mkdir -p ${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}'"
-                    sh "scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
-                }
-            }
-        }
-
-        stage('Remote Tomcat Restart') {
-            steps {
-                script {
-                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST} -p ${REMOTE_PORT}"
-                    sh "ssh ${remoteDir} 'sudo service tomcat9 restart'"
+                    // Copy the HTML file to the remote server using SSH
+                    def context = env.BRANCH_NAME.toLowerCase() // Use lowercase branch name as context
+                    sshPublisher(publishers: [sshPublisherDesc(
+                        configName: 'my_ssh_credentials', // Name of the configured SSH credentials in Jenkins
+                        transfers: [
+                            sshTransfer(
+                                sourceFiles: "${sourceHtmlPath}",
+                                removePrefix: "",
+                                remoteDirectory: "${REMOTE_TOMCAT_WEBAPPS}/${context}"
+                            )
+                        ]
+                    )])
+                    
+                    // Restart Tomcat on the remote server
+                    sshPublisher(publishers: [sshPublisherDesc(
+                        configName: 'my_ssh_credentials', // Name of the configured SSH credentials in Jenkins
+                        transfers: [
+                            sshTransfer(
+                                execCommand: "sudo service tomcat9 restart"
+                            )
+                        ]
+                    )])
                 }
             }
         }
