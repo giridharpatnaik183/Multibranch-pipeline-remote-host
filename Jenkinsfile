@@ -3,46 +3,44 @@ pipeline {
  
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
-        DEV_TOMCAT_IP = '54.91.56.196'
-        DEV_TOMCAT_PORT = '8090'
-        PROD_TOMCAT_IP = '54.197.144.146'
-        PROD_TOMCAT_PORT = '8091'
-        TOMCAT_USERNAME = 'tomcat'
-        TOMCAT_PASSWORD = 'password'
+        REMOTE_USERNAME = 'your_remote_username'
+        REMOTE_HOST = '54.226.135.62'
+        REMOTE_PORT = '22' // SSH port for the remote instance
+        REMOTE_WEBAPPS = '/var/lib/tomcat9/webapps' // Adjust this to the actual path on the remote instance
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from the Git repository
                 checkout scm
             }
         }
 
-        stage('Copy HTML to Tomcat') {
+        stage('Copy HTML to Remote Instance') {
             steps {
                 script {
                     def sourceHtmlPath
-                    def tomcatWebappsDir
-                    def tomcatUrl
-                    def tomcatAuth
 
-                    if (env.BRANCH_NAME.toLowerCase() == 'prod') {
+                    if (env.BRANCH_NAME == 'prod') {
                         sourceHtmlPath = 'index_prod.html'
-                        tomcatWebappsDir = "/manager/text/deploy?path=/&update=true"
-                        tomcatUrl = "http://${PROD_TOMCAT_IP}:${PROD_TOMCAT_PORT}${tomcatWebappsDir}"
-                    } else if (env.BRANCH_NAME.toLowerCase() == 'dev') {
+                    } else if (env.BRANCH_NAME == 'dev') {
                         sourceHtmlPath = 'index_dev.html'
-                        tomcatWebappsDir = "/manager/text/deploy?path=/&update=true"
-                        tomcatUrl = "http://${DEV_TOMCAT_IP}:${DEV_TOMCAT_PORT}${tomcatWebappsDir}"
                     } else {
                         error("Unsupported branch: ${env.BRANCH_NAME}")
                     }
 
-                    tomcatAuth = "${TOMCAT_USERNAME}:${TOMCAT_PASSWORD}"
-                    def context = env.BRANCH_NAME.toLowerCase()
+                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST}:${REMOTE_PORT}:${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}"
+                    sh "sshpass -p my_ssh_credentials ssh -p ${REMOTE_PORT} ${remoteDir} 'mkdir -p ${REMOTE_WEBAPPS}/${env.BRANCH_NAME.toLowerCase()}'"
+                    sh "sshpass -p my_ssh_credentials scp -P ${REMOTE_PORT} ${sourceHtmlPath} ${remoteDir}/index.html"
+                }
+            }
+        }
 
-                    sh "curl -T ${sourceHtmlPath} ${tomcatUrl}${context}/index.html --user ${tomcatAuth} --write-out %{http_code} --silent --output /dev/null"
+        stage('Remote Tomcat Restart') {
+            steps {
+                script {
+                    def remoteDir = "${REMOTE_USERNAME}@${REMOTE_HOST} -p ${REMOTE_PORT}"
+                    sh "sshpass -p my_ssh_credentials ssh -p ${REMOTE_PORT} ${remoteDir} 'sudo service tomcat9 restart'"
                 }
             }
         }
