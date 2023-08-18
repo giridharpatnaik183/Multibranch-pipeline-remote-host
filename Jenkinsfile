@@ -1,6 +1,6 @@
 pipeline {
     agent any
- 
+
     environment {
         TOMCAT_WEBAPPS = '/var/lib/tomcat9/webapps'
         REMOTE_USERNAME = 'RemoteServer'
